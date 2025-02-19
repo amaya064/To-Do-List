@@ -4,16 +4,35 @@ export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email) {
       setError('All fields are required');
       return;
     }
-    setError('');
-    console.log('User Registered:', { name, email });
-    // Add API call here
+    try {
+      const response = await fetch('http://localhost:5000/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: name, email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store user data
+        setSuccess('Registration successful! Redirecting...');
+        setTimeout(() => {
+          window.location.reload(); // Reload page to update navbar
+        }, 1500);
+      } else {
+        setError(data.message);
+      }
+    } catch (error) {
+      setError('Something went wrong. Please try again.');
+    }
   };
 
   return (
